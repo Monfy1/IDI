@@ -32,13 +32,40 @@ void MyGLWidget::initializeGL ()
 
 void MyGLWidget::iniEscena ()
 {
-  radiEsc = sqrt(5);  
+  //radiEsc = sqrt(5);  
+  
+  minC = glm::vec3(-2,-1,-2);       //NOU
+  maxC = glm::vec3(2,2,2);      //NOU
+  radiEsc = glm::distance(minC,maxC)/2.0;       //NOU
 }
 
 void MyGLWidget::iniCamera ()
 {
   angleY = 0.0;
   perspectiva = true;
+  
+  
+  
+  
+  
+  float dist = 2*radiEsc;        //NOU
+    
+  FOV = 2*asin(radiEsc/dist);      //NOU
+  zNear = dist-radiEsc;     //NOU
+  zFar = dist+radiEsc;      //NOU
+  ra = 1.0f;        //NOU
+  //FOV_a = FOV;
+  /*
+  OBS = centre + glm::vec3(0,0,dist);
+  VRP = centre;
+  UP = glm::vec3(0,1,0);
+  */
+  
+  
+  
+  
+  
+  
 
   projectTransform ();
   viewTransform ();
@@ -77,6 +104,11 @@ void MyGLWidget::paintGL ()
   // Pintem l'escena
   glDrawArrays(GL_TRIANGLES, 0, patr.faces().size()*3);
   
+  
+  modelTransformPatricio_2();       //NOU
+  glDrawArrays(GL_TRIANGLES, 0, patr.faces().size()*3);     //NOU
+
+  
   glBindVertexArray(0);
 }
 
@@ -84,6 +116,13 @@ void MyGLWidget::resizeGL (int w, int h)
 {
   ample = w;
   alt = h;
+
+  float rav =float(w)/float(h); //NOU
+  raw_actual = rav; //NOU
+  FOV_a = FOV;
+  if (rav <1.){
+      FOV_a = 2*atan(tan(FOV/2.)/rav);
+  }
 }
 
 void MyGLWidget::modelTransformPatricio ()
@@ -95,6 +134,18 @@ void MyGLWidget::modelTransformPatricio ()
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
+void MyGLWidget::modelTransformPatricio_2 ()
+{
+  glm::mat4 TG(1.f);  // Matriu de transformació
+  TG = glm::translate(TG, glm::vec3(0,2,0));    //NOU
+  TG = glm::rotate(TG, 3.141592f, glm::vec3(0, 0, 1));      //NOU
+  TG = glm::scale(TG, glm::vec3(escala, escala, escala));
+  TG = glm::translate(TG, -centrePatr);
+  
+  glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
+}
+
+
 void MyGLWidget::modelTransformTerra ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
@@ -104,8 +155,11 @@ void MyGLWidget::modelTransformTerra ()
 void MyGLWidget::projectTransform ()
 {
   glm::mat4 Proj;  // Matriu de projecció
-  if (perspectiva)
-    Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
+  if (perspectiva){
+    //Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
+    std::cout << "      " << FOV_a <<std::endl;
+    Proj = glm::perspective (FOV_a, ra, zNear, zFar);}
+  
   else
     Proj = glm::ortho(-radiEsc, radiEsc, -radiEsc, radiEsc, radiEsc, 3.0f*radiEsc);
 

@@ -45,6 +45,8 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     void modelTransformTerra ();
     void modelTransformPatricio ();
     void calculaCapsaModel ();
+    
+    void modelTransformPatricio_2 ();
 
     // VAO names
     GLuint VAO_Patr;
@@ -71,5 +73,13 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     int xClick, yClick;
     float angleY;
     bool perspectiva;
+    
+    
+    glm::vec3 minC, maxC;
+
+    float FOV, zNear, zFar, ra;
+    float raw_actual, FOV_a;
+    
+    
 };
 
