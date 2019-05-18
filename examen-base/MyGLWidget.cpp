@@ -44,28 +44,19 @@ void MyGLWidget::iniCamera ()
   angleY = 0.0;
   perspectiva = true;
 
-
-
-
-
   float dist = 2*radiEsc;        //NOU
 
   FOV = 2*asin(radiEsc/dist);      //NOU
   zNear = dist-radiEsc;     //NOU
   zFar = dist+radiEsc;      //NOU
   ra = 1.0f;        //NOU
-  //FOV_a = FOV;
   /*
   OBS = centre + glm::vec3(0,0,dist);
   VRP = centre;
   UP = glm::vec3(0,1,0);
+
+  Para lookAt(...)
   */
-
-
-
-
-
-
 
   projectTransform ();
   viewTransform ();
@@ -140,7 +131,7 @@ void MyGLWidget::modelTransformPatricio_2 ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
   TG = glm::translate(TG, glm::vec3(0,2,0));    //NOU
-  TG = glm::rotate(TG, 3.141592f, glm::vec3(0, 0, 1));      //NOU
+  TG = glm::rotate(TG, float(M_PI), glm::vec3(0, 0, 1));      //NOU
   TG = glm::scale(TG, glm::vec3(escala, escala, escala));
   TG = glm::translate(TG, -centrePatr);
 
@@ -159,8 +150,9 @@ void MyGLWidget::projectTransform ()
   glm::mat4 Proj;  // Matriu de projecció
   if (perspectiva){
     //Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
-    //std::cout << "      " << FOV_a <<std::endl;
-    Proj = glm::perspective (FOV_a, raw_actual, zNear, zFar);}
+    std::cout << "      " << FOV_a <<std::endl;
+    Proj = glm::perspective (FOV_a, raw_actual, zNear, zFar);  //NOU
+  }
 
   else
     Proj = glm::ortho(-radiEsc, radiEsc, -radiEsc, radiEsc, radiEsc, 3.0f*radiEsc);
@@ -233,10 +225,12 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
   else if (DoingInteractive == ZOOM)
   {
     FOV_a += (e->y() - yClick)/100.0;
-    if (FOV_a < 0) FOV_a = 0.001;
+    if (FOV_a < 0) FOV_a = 0.01;
     else if (FOV_a > 3.1) FOV_a = 3.1;
     FOV = FOV_a;
     projectTransform();
+
+    sincSlide(FOV_a*100);   //NEW
   }
 
 
@@ -468,4 +462,14 @@ void MyGLWidget::carregaShaders()
   transLoc = glGetUniformLocation (program->programId(), "TG");
   projLoc = glGetUniformLocation (program->programId(), "proj");
   viewLoc = glGetUniformLocation (program->programId(), "view");
+}
+
+
+void MyGLWidget::zoomCam(int n)
+{
+  makeCurrent();
+  FOV_a = n/100.;
+  FOV = FOV_a;
+  projectTransform();
+  update();
 }
