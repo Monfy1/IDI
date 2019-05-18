@@ -202,6 +202,14 @@ void MyGLWidget::mousePressEvent (QMouseEvent *e)
   {
     DoingInteractive = ROTATE;
   }
+
+  //NOU
+  if (e->button() & Qt::RightButton &&
+      ! (e->modifiers() & (Qt::ShiftModifier|Qt::AltModifier|Qt::ControlModifier)))
+  {
+    DoingInteractive = ZOOM;
+  }
+
 }
 
 void MyGLWidget::mouseReleaseEvent( QMouseEvent *)
@@ -220,6 +228,17 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
     angleX += (e->y() - yClick) * M_PI / 180.0;   //NOU
     viewTransform ();
   }
+
+  //NOU
+  else if (DoingInteractive == ZOOM)
+  {
+    FOV_a += (e->y() - yClick)/100.0;
+    if (FOV_a < 0) FOV_a = 0.001;
+    else if (FOV_a > 3.1) FOV_a = 3.1;
+    FOV = FOV_a;
+    projectTransform();
+  }
+
 
   xClick = e->x();
   yClick = e->y();

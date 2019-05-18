@@ -68,7 +68,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     // radi de l'escena
     float radiEsc;
 
-    typedef  enum {NONE, ROTATE} InteractiveAction;
+    typedef  enum {NONE, ROTATE, ZOOM} InteractiveAction;   //NEW ZOOM
     InteractiveAction DoingInteractive;
     int xClick, yClick;
     float angleY;
