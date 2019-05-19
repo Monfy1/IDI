@@ -88,4 +88,10 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 
     float FOV, ra;
     float raw_act, FOV_act;
+
+    GLuint esVacaLoc;
+    bool esVaca;
+
+    GLuint esXLoc;
+    bool esX;
 };

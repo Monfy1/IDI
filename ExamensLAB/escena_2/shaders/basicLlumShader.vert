@@ -12,6 +12,9 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 TG;
 
+uniform bool esVaca;   //NOU
+
+
 // Valors per als components que necessitem dels focus de llum
 vec3 colFocus = vec3(0.8, 0.8, 0.8);
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
@@ -56,8 +59,11 @@ vec3 Phong (vec3 NormSCO, vec3 L, vec4 vertSCO)
 
 void main()
 {
-    //std::cout << "shader" << std::endl;
+    if (esVaca){
+    vec3 vacaColor = vec3(0.7,0.7,0.7);
+    fcolor = vacaColor;
+    }
 
-    fcolor = matdiff;
+    else fcolor = matdiff;
     gl_Position = proj * view * TG * vec4 (vertex, 1.0);
 }

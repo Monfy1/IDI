@@ -35,6 +35,7 @@ void MyGLWidget::initializeGL ()
 
   girY = 0;   //NOU
 
+  esX = false;  //NOU
 }
 
 void MyGLWidget::iniEscena ()
@@ -131,11 +132,17 @@ void MyGLWidget::modelTransformPatricio ()
   //update();
 
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
+
+  esVaca = false;   //NOU
+  glUniform1i(esVacaLoc, esVaca);
+
 }
 
 
 void MyGLWidget::modelTransformVaca ()    //NOU
 {
+
+
   glm::mat4 TG(1.f);  // Matriu de transformació
 
   TG = glm::rotate(TG, girY, glm::vec3(0,1,0));   //NOU
@@ -147,6 +154,10 @@ void MyGLWidget::modelTransformVaca ()    //NOU
   TG = glm::translate(TG, -centreCow);
 
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
+
+  esVaca = true;   //NOU
+  glUniform1i(esVacaLoc, esVaca);
+
 }
 
 
@@ -154,6 +165,9 @@ void MyGLWidget::modelTransformTerra ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
+
+  esVaca = false;   //NOU
+  glUniform1i(esVacaLoc, esVaca);
 }
 
 void MyGLWidget::projectTransform ()
@@ -176,7 +190,7 @@ void MyGLWidget::viewTransform ()
 
   //std::cout << "view" << std::endl;
 
-  View = glm::lookAt(glm::vec3(-1,1,-1), posPatr,glm::vec3(0,1,0));
+  View = glm::lookAt(glm::vec3(-1,1,-1), posPatr,glm::vec3(0,1,0));   //NOU
 
   glUniformMatrix4fv (viewLoc, 1, GL_FALSE, &View[0][0]);
 }
@@ -199,7 +213,11 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
 
       //modelTransformPatricio();
       viewTransform();
-
+      break;
+    }
+    case Qt::Key_X: {
+      esX = !esX;
+      glUniform1i(esXLoc, esX);
     }
     default: event->ignore(); break;
   }
@@ -551,4 +569,8 @@ void MyGLWidget::carregaShaders()
   transLoc = glGetUniformLocation (program->programId(), "TG");
   projLoc = glGetUniformLocation (program->programId(), "proj");
   viewLoc = glGetUniformLocation (program->programId(), "view");
+
+  esVacaLoc = glGetUniformLocation (program->programId(), "esVaca");
+  esXLoc = glGetUniformLocation (program->programId(), "esX");
+
 }
