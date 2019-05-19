@@ -85,6 +85,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     float girY;
 
     glm::vec3 posPatr;
-    glm::mat4 TG;
 
+    float FOV, ra;
+    float raw_act, FOV_act;
 };

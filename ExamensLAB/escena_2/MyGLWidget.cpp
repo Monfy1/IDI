@@ -47,6 +47,9 @@ void MyGLWidget::iniCamera ()
   angleY = 0.0;
   perspectiva = true;
 
+  FOV = float(M_PI/3.0);      //NOU
+  ra = 1.0f;    //NOU
+
   projectTransform ();
   viewTransform ();
 }
@@ -97,6 +100,18 @@ void MyGLWidget::resizeGL (int w, int h)
 {
   ample = w;
   alt = h;
+
+  //NOU
+  float rav =float(w)/float(h);
+  raw_act = rav;
+  FOV_act = FOV;
+  if (rav <1)
+  {
+      FOV_act = 2*atan(tan(FOV/2.)/rav);
+  }
+  projectTransform();
+
+
 }
 
 void MyGLWidget::modelTransformPatricio ()
@@ -146,7 +161,7 @@ void MyGLWidget::projectTransform ()
   glm::mat4 Proj;  // Matriu de projecció
   if (perspectiva)
     //Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
-    Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
+    Proj = glm::perspective(FOV_act, raw_act, 1.0f, 3.0f*radiEsc);
   else
     Proj = glm::ortho(-radiEsc, radiEsc, -radiEsc, radiEsc, radiEsc, 3.0f*radiEsc);
 
