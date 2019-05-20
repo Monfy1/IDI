@@ -6,7 +6,7 @@ INCLUDEPATH += ./Model
 
 FORMS += MyForm.ui
 
-HEADERS += MyForm.h MyGLWidget.h
+HEADERS += MyForm.h MyGLWidget.h MyRadioButton.h
 
 SOURCES += main.cpp  MyForm.cpp \
-        MyGLWidget.cpp ./Model/model.cpp
+        MyGLWidget.cpp ./Model/model.cpp MyRadioButton.cpp

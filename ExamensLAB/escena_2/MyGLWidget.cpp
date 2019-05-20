@@ -36,6 +36,9 @@ void MyGLWidget::initializeGL ()
   girY = 0;   //NOU
 
   esX = false;  //NOU
+  glUniform1i(esXLoc, esX);
+  esL = false;    //NOU
+  glUniform1i(esLLoc, esL);
 }
 
 void MyGLWidget::iniEscena ()
@@ -218,6 +221,15 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
     case Qt::Key_X: {
       esX = !esX;
       glUniform1i(esXLoc, esX);
+      break;
+    }
+    case Qt::Key_L: {
+      /*esL = !esL;
+      glUniform1i(esLLoc, esL);
+      std::cout << esL << std::endl;*/
+      canviCamara();
+      sigToggle();
+      break;
     }
     default: event->ignore(); break;
   }
@@ -572,5 +584,15 @@ void MyGLWidget::carregaShaders()
 
   esVacaLoc = glGetUniformLocation (program->programId(), "esVaca");
   esXLoc = glGetUniformLocation (program->programId(), "esX");
+  esLLoc = glGetUniformLocation (program->programId(), "esL");
 
+}
+
+void MyGLWidget::canviCamara()
+{
+  makeCurrent();
+  esL = !esL;
+  glUniform1i(esLLoc, esL);
+  sigNom();
+  update();
 }

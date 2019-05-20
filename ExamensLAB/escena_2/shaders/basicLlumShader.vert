@@ -12,13 +12,17 @@ uniform mat4 proj;
 uniform mat4 view;
 uniform mat4 TG;
 
+
 uniform bool esVaca;   //NOU
+vec3 vacaColor = vec3(0.7,0.7,0.7);    //NOU
+
+uniform bool esL;   //NOU
 
 
 // Valors per als components que necessitem dels focus de llum
-vec3 colFocus = vec3(0.8, 0.8, 0.8);
+vec3 colFocus = vec3(0.0, 0.8, 0.8);    //cian
 vec3 llumAmbient = vec3(0.2, 0.2, 0.2);
-vec3 posFocus = vec3(1, 1, 1);
+vec3 posFocus = vec3(0, 0, 0);
 
 out vec3 fcolor;
 
@@ -31,7 +35,8 @@ vec3 Lambert (vec3 NormSCO, vec3 L)
 
     // Afegim component difusa, si n'hi ha
     if (dot (L, NormSCO) > 0)
-      colRes = colRes + colFocus * matdiff * dot (L, NormSCO);
+      if (!esVaca) colRes = colRes + colFocus * matdiff * dot (L, NormSCO);
+      else colRes = colRes + colFocus * vacaColor * dot (L, NormSCO);   //NOU
     return (colRes);
 }
 
@@ -59,11 +64,28 @@ vec3 Phong (vec3 NormSCO, vec3 L, vec4 vertSCO)
 
 void main()
 {
-    if (esVaca){
-    vec3 vacaColor = vec3(0.7,0.7,0.7);
-    fcolor = vacaColor;
-    }
 
-    else fcolor = matdiff;
+    vec3 vertSCO = (view * TG * vec4(vertex, 1.0)).xyz;
+
+    vec3 posF;
+    if (!esL) {
+      posF = (view * vec4(1,1,1, 1.0)).xyz;   //en escena
+      colFocus = vec3(0.8, 0.8, 0.8);
+    }
+    else posF = posFocus;   //en camara
+
+    //posF = (view * vec4(posFocus, 1.0)).xyz;
+
+    vec3 L = posF - vertSCO;
+
+    mat3 NormalMatrix = (inverse(transpose(mat3(view * TG))));
+    vec3 NormSCO = NormalMatrix * normal;
+
+    L = normalize(L);
+    NormSCO = normalize(NormSCO);
+
+    fcolor = Phong(NormSCO, L, vec4(vertSCO, 1.0));
+
+
     gl_Position = proj * view * TG * vec4 (vertex, 1.0);
 }

@@ -11,7 +11,7 @@ uniform bool esX;		//NOU
 void main()
 {
 
-	if (esX) FragColor = vec4(fcolor,1);
+	if (!esX) FragColor = vec4(fcolor,1);
 
 	else {
 		if (esVaca) {
