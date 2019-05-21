@@ -212,7 +212,7 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
 
       glm::mat4 TGR(1.f);
       TGR = glm::rotate(TGR, -float(M_PI/6), glm::vec3(0,1,0));
-      posPatr = TGR * glm::vec4(posPatr,1);
+      posPatr = glm::vec3(TGR * glm::vec4(posPatr,1));
 
       //modelTransformPatricio();
       viewTransform();
