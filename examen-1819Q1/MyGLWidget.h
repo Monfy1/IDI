@@ -11,7 +11,7 @@
 
 #include "model.h"
 
-class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core 
+class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
   Q_OBJECT
 
@@ -29,7 +29,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     virtual void resizeGL (int width, int height);
     // keyPressEvent - Es cridat quan es prem una tecla
     virtual void keyPressEvent (QKeyEvent *event);
-    // mouse{Press/Release/Move}Event - Són cridades quan es realitza l'event 
+    // mouse{Press/Release/Move}Event - Són cridades quan es realitza l'event
     // corresponent de ratolí
     virtual void mousePressEvent (QMouseEvent *event);
     virtual void mouseReleaseEvent (QMouseEvent *event);
@@ -54,6 +54,8 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     void iniciPilota ();
     void tractamentGol();
     bool aturaPorter();
+
+    void modelTransformModel_2 ();    //NOU
 
     // VAO i VBO names
     GLuint VAO_Patr, VAO_Pil, VAO_Port, VAO_Terra;
@@ -82,7 +84,28 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     QTimer timer;
     int anglePilota;
 
+    //NOU
+    glm::vec3 minC, maxC;
+
+    float FOV, zNear, zFar, ra;
+    float raw_act, FOV_act;
+    float dist;
+    bool cam2;
+
+    int ample, alt;
+
+    glm::vec3 colFocus;
+    GLuint colLoc;
+
+    float movP;
+
   public slots:
     void mourePilota ();
-};
+    void actCam2();
+    void canviDirec(int);
+    void reiniciar_tot();
 
+    signals:
+    void sig_res();
+    void sig_res2(int);
+};

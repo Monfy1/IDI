@@ -19,7 +19,7 @@ MyGLWidget::~MyGLWidget ()
 void MyGLWidget::initializeGL ()
 {
   // Cal inicialitzar l'ús de les funcions d'OpenGL
-  initializeOpenGLFunctions();  
+  initializeOpenGLFunctions();
 
   glClearColor(0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
   glEnable(GL_DEPTH_TEST);
@@ -29,41 +29,61 @@ void MyGLWidget::initializeGL ()
   createBuffersPorteria();
   createBuffersTerra();
 
+  cam2 = false;
+
+  colFocus = glm::vec3(0.8,0.8,0.8);
+  glUniform3fv (colLoc, 1, &colFocus[0]);
+
+  movP = 0;
+
   iniEscena();
   iniCamera();
 }
 
 void MyGLWidget::iniEscena ()
 {
-  radiEsc = sqrt(80);
+  //radiEsc = sqrt(80);
 
   posPilota = glm::vec3(6.0, 0.0, 0.0);  // posició inicial de la pilota
   anglePilota = 0;  // angle inicial del xut
+
+  minC = glm::vec3(-10,0,-6);
+  maxC = glm::vec3(10,6,6);
+  radiEsc = glm::distance(minC,maxC)/2.0;
 }
 
 void MyGLWidget::iniCamera ()
 {
   angleY = M_PI/4.0;
+  angleX = 0;
+
+
+  dist = 2*radiEsc;
+  FOV = 2*asin(radiEsc/dist);
+  zNear = dist-radiEsc;
+  zFar = dist+radiEsc;
+  ra = 1.0f;
+
 
   projectTransform ();
   viewTransform ();
 }
 
-void MyGLWidget::paintGL () 
+void MyGLWidget::paintGL ()
 {
   glViewport (0, 0, width(), height()); // Aquesta crida no caldria perquè Qt la fa de forma automàtica amb aquests paràmetres
-  
+
   // Esborrem el frame-buffer i el depth-buffer
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Activem el VAO per a pintar el terra 
+  // Activem el VAO per a pintar el terra
   glBindVertexArray (VAO_Terra);
 
   modelTransformIdent ();
   // pintem terra
   glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
-  // Activem el VAO per a pintar la porteria 
+  // Activem el VAO per a pintar la porteria
   glBindVertexArray (VAO_Port);
 
   modelTransformIdent ();
@@ -76,26 +96,58 @@ void MyGLWidget::paintGL ()
   modelTransformModel ();
   // Pintem Patricio
   glDrawArrays(GL_TRIANGLES, 0, patr.faces().size()*3);
-  
+
+
+  modelTransformModel_2 ();
+  // Pintem Patricio
+  glDrawArrays(GL_TRIANGLES, 0, patr.faces().size()*3);
+
+
+
   glBindVertexArray (VAO_Pil);
 
   modelTransformPilota ();
   // Pintem Pilota
   glDrawArrays(GL_TRIANGLES, 0, pil.faces().size()*3);
-  
+
   glBindVertexArray(0);
 }
 
-void MyGLWidget::resizeGL (int w, int h) 
+void MyGLWidget::resizeGL (int w, int h)
 {
-  // Aquí anirà el codi que cal fer quan es redimensiona la finestra
+  ample = w;
+  alt = h;
+
+  float rav =float(w)/float(h);
+  raw_act = rav;
+  FOV_act = FOV;
+  if (rav <1)
+  {
+      FOV_act = 2*atan(tan(FOV/2.)/rav);
+  }
+  projectTransform();
 }
 
 void MyGLWidget::modelTransformModel ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
+  TG = glm::translate(TG, glm::vec3(8,0,0));
+  TG = glm::rotate(TG, -float(M_PI/2), glm::vec3(0,1,0));
+  TG = glm::scale(TG, glm::vec3(4*escalaModel, 4*escalaModel, 4*escalaModel));
   TG = glm::translate(TG, -centreBaseModel);
-  
+
+  glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
+}
+
+void MyGLWidget::modelTransformModel_2 ()
+{
+  glm::mat4 TG(1.f);  // Matriu de transformació
+  TG = glm::translate(TG, glm::vec3(0,0,movP));
+  TG = glm::translate(TG, glm::vec3(-7,0,0));
+  TG = glm::rotate(TG, float(M_PI/2), glm::vec3(0,1,0));
+  TG = glm::scale(TG, glm::vec3(4*escalaModel, 4*escalaModel, 4*escalaModel));
+  TG = glm::translate(TG, -centreBaseModel);
+
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
@@ -105,7 +157,7 @@ void MyGLWidget::modelTransformPilota ()
   TG = glm::translate(TG, posPilota);
   TG = glm::scale(TG, glm::vec3(escalaPil, escalaPil, escalaPil));
   TG = glm::translate(TG, -centreBasePil);
-  
+
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
@@ -118,7 +170,8 @@ void MyGLWidget::modelTransformIdent ()
 void MyGLWidget::projectTransform ()
 {
   glm::mat4 Proj;  // Matriu de projecció
-  Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
+  Proj = glm::perspective(FOV_act, raw_act, zNear, zFar);
+  //if(cam2) Proj = glm::perspective(FOV_act, raw_act, 0.1f, zFar);
 
   glUniformMatrix4fv (projLoc, 1, GL_FALSE, &Proj[0][0]);
 }
@@ -128,6 +181,9 @@ void MyGLWidget::viewTransform ()
   glm::mat4 View;  // Matriu de posició i orientació
   View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
   View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
+  View = glm::rotate(View, -angleX, glm::vec3(1, 0, 0));
+
+  if(cam2) View = glm::lookAt(glm::vec3(8,5,0), glm::vec3(-8,5,0),glm::vec3(0,1,0));
 
   glUniformMatrix4fv (viewLoc, 1, GL_FALSE, &View[0][0]);
 }
@@ -155,7 +211,7 @@ void MyGLWidget::mouPilota(int alfa) // No cal modificar aquest métode
 
   if (aturaPorter())
     timer.stop();
-  else  
+  else
     if (posPilota[0] <= -8.0)
     {
       posPilota[0] = -9.0;
@@ -167,19 +223,23 @@ void MyGLWidget::mouPilota(int alfa) // No cal modificar aquest métode
 
 void MyGLWidget::tractamentGol()
 {
-  // Aquí anirà el tractament demanat en l'exercici 4 quan es produeix un gol.
-} 
+  colFocus = glm::vec3(1,0,0);
+  glUniform3fv (colLoc, 1, &colFocus[0]);
+}
 
 bool MyGLWidget::aturaPorter()
 {
   bool atura = false;
-  
-  // Aquí falta el tractament demanat en exercici 6 per saber si hi ha col·lisió entre la pilota i el porter
+  if (movP-1 <= posPilota.z and posPilota.z <= movP+1){
+    if (-6.3 < posPilota.x and posPilota.x < -5.8){
+      atura = true;
+    }
+  }
 
   return atura;
 }
 
-void MyGLWidget::keyPressEvent(QKeyEvent* event) 
+void MyGLWidget::keyPressEvent(QKeyEvent* event)
 {
   makeCurrent();
   switch (event->key()) {
@@ -190,6 +250,18 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
     }
     case Qt::Key_I: { // reinicia posició pilota
       iniciPilota ();
+      colFocus = glm::vec3(0.8,0.8,0.8);
+      glUniform3fv (colLoc, 1, &colFocus[0]);
+      break;
+    }
+    case Qt::Key_Left: { // reinicia posició pilota
+      movP += 0.5;
+      if (movP > 3) movP = 3;
+      break;
+    }
+    case Qt::Key_Right: { // reinicia posició pilota
+      movP -= 0.5;
+      if (movP < -3) movP = -3;
       break;
     }
     default: event->ignore(); break;
@@ -222,6 +294,7 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
   {
     // Fem la rotació
     angleY += (e->x() - xClick) * M_PI / 180.0;
+    angleX += (e->y() - yClick) * M_PI / 180.0;
     viewTransform ();
   }
 
@@ -260,11 +333,11 @@ void MyGLWidget::calculaCapsaModel (Model &p, float &escala, glm::vec3 &centreBa
 void MyGLWidget::createBuffersModel ()
 {
   // Carreguem el model de l'OBJ - Atenció! Abans de crear els buffers!
-  patr.load("./models/Patricio.obj");
+  patr.load("./models/legoman.obj");
 
   // Calculem la capsa contenidora del model
   calculaCapsaModel (patr, escalaModel, centreBaseModel);
-  
+
   // Creació del Vertex Array Object del Patricio
   glGenVertexArrays(1, &VAO_Patr);
   glBindVertexArray(VAO_Patr);
@@ -326,7 +399,7 @@ void MyGLWidget::createBuffersPilota ()
 
   // Calculem la capsa contenidora del model
   calculaCapsaModel (pil, escalaPil, centreBasePil);
-  
+
   // Creació del Vertex Array Object del Patricio
   glGenVertexArrays(1, &VAO_Pil);
   glBindVertexArray(VAO_Pil);
@@ -390,7 +463,7 @@ void MyGLWidget::createBuffersTerra ()
         glm::vec3(-10.0, 0.0,  6.0),
         glm::vec3( 10.0, 0.0, -6.0),
         glm::vec3( 10.0, 0.0,  6.0)
-  }; 
+  };
 
   // VBO amb la normal de cada vèrtex
   glm::vec3 normt (0,1,0);
@@ -691,5 +764,38 @@ void MyGLWidget::carregaShaders()
   transLoc = glGetUniformLocation (program->programId(), "TG");
   projLoc = glGetUniformLocation (program->programId(), "proj");
   viewLoc = glGetUniformLocation (program->programId(), "view");
+
+  colLoc = glGetUniformLocation (program->programId(), "colFocus");
 }
 
+void MyGLWidget::actCam2(){
+  makeCurrent();
+  cam2 = !cam2;
+  if (cam2){
+    FOV = float(M_PI/2.0);
+    zNear = 1.5f;
+  }
+  else {
+    FOV = 2*asin(radiEsc/dist);
+    zNear = dist-radiEsc;
+  }
+  resizeGL(ample, alt);
+  viewTransform();
+  projectTransform();
+  update();
+}
+
+void MyGLWidget::canviDirec(int a){
+  anglePilota = -a;
+}
+
+void MyGLWidget::reiniciar_tot(){
+  makeCurrent();
+  if (cam2) {
+    sig_res();
+  }
+  sig_res2(0);
+  initializeGL();
+  resizeGL(ample, alt);
+  update();
+}

@@ -27,6 +27,26 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QRadioButton" name="radioButton">
+       <property name="text">
+        <string>Càmara 2</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QDial" name="dial">
+       <property name="minimum">
+        <number>-15</number>
+       </property>
+       <property name="maximum">
+        <number>15</number>
+       </property>
+       <property name="tracking">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -38,6 +58,13 @@
         </size>
        </property>
       </spacer>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>Reset</string>
+       </property>
+      </widget>
      </item>
      <item>
       <widget class="QPushButton" name="pushButton">
@@ -62,6 +89,13 @@
    <extends>QWidget</extends>
    <header>MyGLWidget.h</header>
    <container>1</container>
+   <slots>
+    <signal>sig_res()</signal>
+    <signal>sig_res2(int)</signal>
+    <slot>actCam2()</slot>
+    <slot>canviDirec(int)</slot>
+    <slot>reiniciar_tot()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -73,12 +107,92 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>796</x>
-     <y>596</y>
+     <x>803</x>
+     <y>715</y>
     </hint>
     <hint type="destinationlabel">
      <x>839</x>
      <y>529</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radioButton</sender>
+   <signal>clicked()</signal>
+   <receiver>widget</receiver>
+   <slot>actCam2()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>751</x>
+     <y>26</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>704</x>
+     <y>81</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>dial</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widget</receiver>
+   <slot>canviDirec(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>767</x>
+     <y>106</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>685</x>
+     <y>195</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>pushButton_2</sender>
+   <signal>clicked()</signal>
+   <receiver>widget</receiver>
+   <slot>reiniciar_tot()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>756</x>
+     <y>666</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>707</x>
+     <y>585</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widget</sender>
+   <signal>sig_res()</signal>
+   <receiver>radioButton</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>701</x>
+     <y>287</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>789</x>
+     <y>25</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widget</sender>
+   <signal>sig_res2(int)</signal>
+   <receiver>dial</receiver>
+   <slot>setValue(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>678</x>
+     <y>352</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>748</x>
+     <y>102</y>
     </hint>
    </hints>
   </connection>
