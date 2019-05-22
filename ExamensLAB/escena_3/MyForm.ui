@@ -27,6 +27,13 @@
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
      <item>
+      <widget class="QCheckBox" name="checkBox">
+       <property name="text">
+        <string>Camara Patricio</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -62,6 +69,10 @@
    <extends>QWidget</extends>
    <header>MyGLWidget.h</header>
    <container>1</container>
+   <slots>
+    <signal>sigCam()</signal>
+    <slot>checkCam()</slot>
+   </slots>
   </customwidget>
  </customwidgets>
  <resources/>
@@ -73,12 +84,44 @@
    <slot>close()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>796</x>
-     <y>596</y>
+     <x>765</x>
+     <y>715</y>
     </hint>
     <hint type="destinationlabel">
      <x>839</x>
      <y>529</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>checkBox</sender>
+   <signal>clicked()</signal>
+   <receiver>widget</receiver>
+   <slot>checkCam()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>761</x>
+     <y>23</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>621</x>
+     <y>148</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>widget</sender>
+   <signal>sigCam()</signal>
+   <receiver>checkBox</receiver>
+   <slot>toggle()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>627</x>
+     <y>242</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>793</x>
+     <y>22</y>
     </hint>
    </hints>
   </connection>

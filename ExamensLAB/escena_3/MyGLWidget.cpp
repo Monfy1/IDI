@@ -151,7 +151,7 @@ void MyGLWidget::projectTransform ()
   if (perspectiva){
     //Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
     if(!camPatr) Proj = glm::perspective (FOV_act, raw_act, zNear, zFar);
-    else Proj = glm::perspective (FOV_act, raw_act, 1.0f, zFar); //zfar?
+    else Proj = glm::perspective (FOV_act, raw_act, 0.1f, zFar); //zfar?
   }
   else
     Proj = glm::ortho(-radiEsc, radiEsc, -radiEsc, radiEsc, radiEsc, 3.0f*radiEsc);
@@ -197,12 +197,14 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
       break;
     }
     case Qt::Key_C: {
-      camPatr = !camPatr;
+      /*camPatr = !camPatr;
       if (!camPatr) FOV = 2*asin(radiEsc/dist);
       else FOV = float(M_PI/2.0);
       FOV_act = FOV;
       viewTransform ();
-      projectTransform ();
+      projectTransform ();*/
+      checkCam();
+      sigCam();
       break;
     }
 
@@ -474,4 +476,15 @@ void MyGLWidget::carregaShaders()
   viewLoc = glGetUniformLocation (program->programId(), "view");
 
   posLoc = glGetUniformLocation (program->programId(), "posFocus");
+}
+
+void MyGLWidget::checkCam(){
+  makeCurrent();
+  camPatr = !camPatr;
+  if (!camPatr) FOV = 2*asin(radiEsc/dist);
+  else FOV = float(M_PI/2.0);
+  FOV_act = FOV;
+  viewTransform ();
+  projectTransform ();
+  update();
 }
