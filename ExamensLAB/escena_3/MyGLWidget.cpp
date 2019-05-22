@@ -20,6 +20,8 @@ void MyGLWidget::initializeGL ()
   // Cal inicialitzar l'ús de les funcions d'OpenGL
   initializeOpenGLFunctions();
 
+  diff = glm::vec3(0.8,0,0.8);
+
   glClearColor (0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
   glEnable (GL_DEPTH_TEST);
   carregaShaders();
@@ -30,6 +32,7 @@ void MyGLWidget::initializeGL ()
   glUniform3fv (posLoc, 1, &posFocus[0]);
 
   camPatr = false;
+
 
 
   iniEscena();
@@ -369,7 +372,8 @@ void MyGLWidget::createBuffersTerraIParet ()
 
   // Definim el material del terra
   glm::vec3 amb(0.2,0,0.2);
-  glm::vec3 diff(0.8,0,0.8);
+  //glm::vec3 diff(0.8,0,0.8);    //NOU
+
   glm::vec3 spec(0,0,0);
   float shin = 100;
 
@@ -486,5 +490,31 @@ void MyGLWidget::checkCam(){
   FOV_act = FOV;
   viewTransform ();
   projectTransform ();
+  update();
+}
+
+
+/*void MyGLWidget(){
+
+}*/
+
+
+void MyGLWidget::R_color(int c){
+  makeCurrent();
+  diff.x = c/100.0;
+  createBuffersTerraIParet();   //ineficiente - facil
+  update();
+
+}
+void MyGLWidget::G_color(int c){
+  makeCurrent();
+  diff.y = c/100.0;
+  createBuffersTerraIParet();   //ineficiente - facil
+  update();
+}
+void MyGLWidget::B_color(int c){
+  makeCurrent();
+  diff.z = c/100.0;
+  createBuffersTerraIParet();   //ineficiente - facil
   update();
 }

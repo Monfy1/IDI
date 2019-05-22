@@ -34,6 +34,46 @@
       </widget>
      </item>
      <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QSlider" name="verticalSlider_3">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>80</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="verticalSlider">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QSlider" name="verticalSlider_2">
+         <property name="maximum">
+          <number>100</number>
+         </property>
+         <property name="value">
+          <number>80</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
       <spacer name="verticalSpacer">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
@@ -72,6 +112,9 @@
    <slots>
     <signal>sigCam()</signal>
     <slot>checkCam()</slot>
+    <slot>R_color(int)</slot>
+    <slot>G_color(int)</slot>
+    <slot>B_color(int)</slot>
    </slots>
   </customwidget>
  </customwidgets>
@@ -122,6 +165,54 @@
     <hint type="destinationlabel">
      <x>793</x>
      <y>22</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider_3</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widget</receiver>
+   <slot>R_color(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>710</x>
+     <y>329</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>664</x>
+     <y>419</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widget</receiver>
+   <slot>G_color(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>747</x>
+     <y>310</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>640</x>
+     <y>472</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>verticalSlider_2</sender>
+   <signal>valueChanged(int)</signal>
+   <receiver>widget</receiver>
+   <slot>B_color(int)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>785</x>
+     <y>347</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>648</x>
+     <y>524</y>
     </hint>
    </hints>
   </connection>

@@ -20,6 +20,10 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     public
     slots:
     void checkCam();
+    void R_color(int);
+    void G_color(int);
+    void B_color(int);
+
     signals:
     void sigCam();
 
@@ -96,4 +100,6 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 
     bool camPatr;
     float dist;
+
+    glm::vec3 diff;
 };
