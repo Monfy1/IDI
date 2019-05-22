@@ -18,7 +18,7 @@ MyGLWidget::~MyGLWidget ()
 void MyGLWidget::initializeGL ()
 {
   // Cal inicialitzar l'ús de les funcions d'OpenGL
-  initializeOpenGLFunctions();  
+  initializeOpenGLFunctions();
 
   glClearColor (0.5, 0.7, 1.0, 1.0); // defineix color de fons (d'esborrat)
   glEnable (GL_DEPTH_TEST);
@@ -26,25 +26,43 @@ void MyGLWidget::initializeGL ()
   createBuffersPatricio();
   createBuffersTerraIParet();
 
+  posFocus = glm::vec3(-2,1,0);
+  glUniform3fv (posLoc, 1, &posFocus[0]);
+
+  camPatr = false;
+
+
   iniEscena();
   iniCamera();
 }
 
 void MyGLWidget::iniEscena ()
 {
-  radiEsc = sqrt(5);  
+  //radiEsc = sqrt(5);
+  minC = glm::vec3(-2-escala1*amplePatr,-1,-2);       //NOU
+  maxC = glm::vec3(2+escala2*amplePatr,2,2);      //NOU
+
+  radiEsc = glm::distance(minC,maxC)/2.0;
 }
 
 void MyGLWidget::iniCamera ()
 {
   angleY = 0.0;
+  angleX = 0.0;   //NOU
   perspectiva = true;
+
+  dist = 2*radiEsc;
+
+  FOV = 2*asin(radiEsc/dist);      //NOU
+  zNear = dist-radiEsc;
+  zFar = dist+radiEsc;
+  ra = 1.0f;
 
   projectTransform ();
   viewTransform ();
 }
 
-void MyGLWidget::paintGL () 
+void MyGLWidget::paintGL ()
 {
 // Aquest codi és necessari únicament per a MACs amb pantalla retina.
 #ifdef __APPLE__
@@ -57,11 +75,11 @@ void MyGLWidget::paintGL ()
 // En cas de voler canviar els paràmetres del viewport, descomenteu la crida següent i
 // useu els paràmetres que considereu (els que hi ha són els de per defecte)
 //  glViewport (0, 0, ample, alt);
-  
+
   // Esborrem el frame-buffer i el depth-buffer
   glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  // Activem el VAO per a pintar el terra 
+  // Activem el VAO per a pintar el terra
   glBindVertexArray (VAO_Terra);
 
   modelTransformTerra ();
@@ -76,22 +94,48 @@ void MyGLWidget::paintGL ()
 
   // Pintem l'escena
   glDrawArrays(GL_TRIANGLES, 0, patr.faces().size()*3);
-  
+
+  modelTransformPatricio_2 ();    //NOU
+  glDrawArrays(GL_TRIANGLES, 0, patr.faces().size()*3);   //NOU
+
   glBindVertexArray(0);
 }
 
-void MyGLWidget::resizeGL (int w, int h) 
+void MyGLWidget::resizeGL (int w, int h)
 {
   ample = w;
   alt = h;
+
+  float rav =float(w)/float(h);
+  raw_act = rav;
+  FOV_act = FOV;
+  if (rav <1)
+  {
+      FOV_act = 2*atan(tan(FOV/2.)/rav);
+  }
+  projectTransform();
 }
 
 void MyGLWidget::modelTransformPatricio ()
 {
   glm::mat4 TG(1.f);  // Matriu de transformació
-  TG = glm::scale(TG, glm::vec3(escala, escala, escala));
+  TG = glm::translate(TG, glm::vec3(pasito,0,0));
+  TG = glm::translate(TG, glm::vec3(-2,-1,0));
+  TG = glm::rotate(TG, float(M_PI/2), glm::vec3(0,1,0));
+  TG = glm::scale(TG, glm::vec3(escala1, escala1, escala1));
   TG = glm::translate(TG, -centrePatr);
-  
+
+  glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
+}
+
+void MyGLWidget::modelTransformPatricio_2 ()
+{
+  glm::mat4 TG(1.f);  // Matriu de transformació
+  TG = glm::translate(TG, glm::vec3(2,-1,1));
+  TG = glm::rotate(TG, -float(M_PI/2), glm::vec3(0,1,0));
+  TG = glm::scale(TG, glm::vec3(escala2, escala2, escala2));
+  TG = glm::translate(TG, -centrePatr);
+
   glUniformMatrix4fv (transLoc, 1, GL_FALSE, &TG[0][0]);
 }
 
@@ -104,8 +148,11 @@ void MyGLWidget::modelTransformTerra ()
 void MyGLWidget::projectTransform ()
 {
   glm::mat4 Proj;  // Matriu de projecció
-  if (perspectiva)
-    Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
+  if (perspectiva){
+    //Proj = glm::perspective(float(M_PI/3.0), 1.0f, radiEsc, 3.0f*radiEsc);
+    if(!camPatr) Proj = glm::perspective (FOV_act, raw_act, zNear, zFar);
+    else Proj = glm::perspective (FOV_act, raw_act, 1.0f, zFar); //zfar?
+  }
   else
     Proj = glm::ortho(-radiEsc, radiEsc, -radiEsc, radiEsc, radiEsc, 3.0f*radiEsc);
 
@@ -115,13 +162,18 @@ void MyGLWidget::projectTransform ()
 void MyGLWidget::viewTransform ()
 {
   glm::mat4 View;  // Matriu de posició i orientació
-  View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
-  View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
+  if (!camPatr) {
+    View = glm::translate(glm::mat4(1.f), glm::vec3(0, 0, -2*radiEsc));
+    View = glm::rotate(View, -angleY, glm::vec3(0, 1, 0));
+    View = glm::rotate(View, -angleX, glm::vec3(1, 0, 0));
+  }
+
+  else View = glm::lookAt(glm::vec3(-2+pasito,1.5,0), glm::vec3(2,0.25,1),glm::vec3(0,1,0));
 
   glUniformMatrix4fv (viewLoc, 1, GL_FALSE, &View[0][0]);
 }
 
-void MyGLWidget::keyPressEvent(QKeyEvent* event) 
+void MyGLWidget::keyPressEvent(QKeyEvent* event)
 {
   makeCurrent();
   switch (event->key()) {
@@ -130,6 +182,30 @@ void MyGLWidget::keyPressEvent(QKeyEvent* event)
       projectTransform ();
       break;
     }
+    case Qt::Key_A: {
+      pasito += 0.1;
+      posFocus.x += 0.1;
+      glUniform3fv (posLoc, 1, &posFocus[0]);
+      viewTransform ();
+      break;
+    }
+    case Qt::Key_D: {
+      pasito -= 0.1;
+      posFocus.x -= 0.1;
+      glUniform3fv (posLoc, 1, &posFocus[0]);
+      viewTransform ();
+      break;
+    }
+    case Qt::Key_C: {
+      camPatr = !camPatr;
+      if (!camPatr) FOV = 2*asin(radiEsc/dist);
+      else FOV = float(M_PI/2.0);
+      FOV_act = FOV;
+      viewTransform ();
+      projectTransform ();
+      break;
+    }
+
     default: event->ignore(); break;
   }
   update();
@@ -160,6 +236,7 @@ void MyGLWidget::mouseMoveEvent(QMouseEvent *e)
   {
     // Fem la rotació
     angleY += (e->x() - xClick) * M_PI / 180.0;
+    angleX += (e->y() - yClick) * M_PI / 180.0;
     viewTransform ();
   }
 
@@ -191,8 +268,12 @@ void MyGLWidget::calculaCapsaModel ()
     if (patr.vertices()[i+2] > maxz)
       maxz = patr.vertices()[i+2];
   }
-  escala = 2.0/(maxy-miny);
-  centrePatr[0] = (minx+maxx)/2.0; centrePatr[1] = (miny+maxy)/2.0; centrePatr[2] = (minz+maxz)/2.0;
+  escala1 = 1.0/(maxy-miny);    //NOU
+  escala2 = 2.5/(maxy-miny);    //NOU
+
+  centrePatr[0] = (minx+maxx)/2.0; centrePatr[1] = miny; centrePatr[2] = (minz+maxz)/2.0;
+
+  amplePatr = (minz+maxz)/2.0;
 }
 
 void MyGLWidget::createBuffersPatricio ()
@@ -202,7 +283,7 @@ void MyGLWidget::createBuffersPatricio ()
 
   // Calculem la capsa contenidora del model
   calculaCapsaModel ();
-  
+
   // Creació del Vertex Array Object del Patricio
   glGenVertexArrays(1, &VAO_Patr);
   glBindVertexArray(VAO_Patr);
@@ -274,7 +355,7 @@ void MyGLWidget::createBuffersTerraIParet ()
 	glm::vec3(-2.0, 1.0, -2.0),
 	glm::vec3(2.0, -1.0, -2.0),
 	glm::vec3(2.0, 1.0, -2.0)
-  }; 
+  };
 
   // VBO amb la normal de cada vèrtex
   glm::vec3 norm1 (0,1,0);
@@ -391,6 +472,6 @@ void MyGLWidget::carregaShaders()
   transLoc = glGetUniformLocation (program->programId(), "TG");
   projLoc = glGetUniformLocation (program->programId(), "proj");
   viewLoc = glGetUniformLocation (program->programId(), "view");
+
+  posLoc = glGetUniformLocation (program->programId(), "posFocus");
 }
-
-

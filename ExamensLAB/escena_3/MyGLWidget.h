@@ -10,7 +10,7 @@
 
 #include "model.h"
 
-class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core 
+class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
 {
   Q_OBJECT
 
@@ -28,7 +28,7 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     virtual void resizeGL (int width, int height);
     // keyPressEvent - Es cridat quan es prem una tecla
     virtual void keyPressEvent (QKeyEvent *event);
-    // mouse{Press/Release/Move}Event - Són cridades quan es realitza l'event 
+    // mouse{Press/Release/Move}Event - Són cridades quan es realitza l'event
     // corresponent de ratolí
     virtual void mousePressEvent (QMouseEvent *event);
     virtual void mouseReleaseEvent (QMouseEvent *event);
@@ -46,6 +46,8 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     void modelTransformPatricio ();
     void calculaCapsaModel ();
 
+    void modelTransformPatricio_2 ();   //NOU
+
     // VAO names
     GLuint VAO_Patr;
     GLuint VAO_Terra;
@@ -62,7 +64,8 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     Model patr;
     // paràmetres calculats a partir de la capsa contenidora del model
     glm::vec3 centrePatr;
-    float escala;
+    float escala1;
+    float escala2;
     // radi de l'escena
     float radiEsc;
 
@@ -71,5 +74,21 @@ class MyGLWidget : public QOpenGLWidget, protected QOpenGLFunctions_3_3_Core
     int xClick, yClick;
     float angleY;
     bool perspectiva;
-};
 
+    //NOU
+    float angleX;   //NOU
+
+    glm::vec3 minC, maxC;
+    float amplePatr;
+
+    float FOV, zNear, zFar, ra;
+    float raw_act, FOV_act;
+
+    float pasito;
+
+    GLuint posLoc;
+    glm::vec3 posFocus;
+
+    bool camPatr;
+    float dist;
+};
